@@ -1,0 +1,65 @@
+* Day 4
+#+BEGIN_SRC elisp
+  (ert-deftest six-digits-p-test ()
+    (should (equal (6-digits-p 0) nil))
+    (should (equal (6-digits-p 111111) t))
+    (should (equal (6-digits-p 1111111) nil)))
+
+  (ert-deftest repeats-adjacent-at-least-one-digit-at-least-once ()
+    (should (equal (repeats-a-number-p 0) nil))
+    (should (equal (repeats-a-number-p 11) t))
+    (should (equal (repeats-a-number-p 122) t))
+    (should (equal (repeats-a-number-p 123) nil)))
+
+  (ert-deftest digits-always-increase-left-to-right ()
+    (should (equal (digits-increase-p 223450) nil))
+    (should (equal (digits-increase-p 111123) t))
+    (should (equal (digits-increase-p 136789) t)))
+
+  (ert-deftest day-4-1-test ()
+    (should (equal (test-number 111111) t))
+    (should (equal (test-number 223450) nil))
+    (should (equal (test-number 123789) nil))
+    (should (equal (test-number 333333) t))
+    (should (equal (test-number 699999) t)))
+
+  (defun 6-digits-p (num)
+    (= (length (number-to-string num)) 6))
+
+  (defun repeats-a-number-p (num)
+    (setq res nil)
+    (let ((digits (vconcat (split-string (number-to-string num) "" t))))
+      (dotimes (i (length digits) res)
+        (if (and (> i 0) (null res))
+            (when (= (string-to-number (elt digits i)) (string-to-number (elt digits (1- i))))
+              (setq res t)))))
+    res)
+
+  (defun digits-increase-p (num)
+    (setq increase-p t)
+    (let ((digits (vconcat (split-string (number-to-string num) "" t))))
+      (dotimes (i (length digits))
+        (if (and (> i 0) (equal increase-p t))
+            (if (< (string-to-number (elt digits i)) (string-to-number (elt digits (1- i))))
+                (setq increase-p nil)))))
+    increase-p)
+
+  (defun test-number (num)
+    (when (and
+           (6-digits-p num)
+           (repeats-a-number-p num)
+           (digits-increase-p num))
+      t))
+
+  (defun count-valid-passwords (start end)
+    (let ((valid-count 0))
+      (dotimes (i (- end start))
+        (when (test-number (+ start i))
+          (setq valid-count (1+ valid-count))))
+      valid-count))
+
+  (print (count-valid-passwords 284639 748759))
+#+END_SRC
+
+#+RESULTS:
+: 895

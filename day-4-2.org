@@ -1,0 +1,79 @@
+* Day 4.2
+#+BEGIN_SRC elisp
+  (ert-deftest six-digits-p-test ()
+    (should (equal (6-digits-p 0) nil))
+    (should (equal (6-digits-p 111111) t))
+    (should (equal (6-digits-p 1111111) nil)))
+
+  (ert-deftest digits-always-increase-left-to-right ()
+    (should (equal (digits-increase-p 223450) nil))
+    (should (equal (digits-increase-p 111123) t))
+    (should (equal (digits-increase-p 136789) t)))
+
+  (ert-deftest day-4-2-test ()
+    (should (equal (test-number2 112233) t))
+    (should (equal (test-number2 123444) nil))
+    (should (equal (test-number2 111122) t))
+    (should (equal (test-number2 666899) t))
+    (should (equal (test-number2 666777) nil))
+    (should (equal (test-number2 667778) t))
+    (should (equal (test-number2 112222) t))
+    (should (equal (test-number2 122333) t))
+    (should (equal (test-number2 123345) t))
+    (should (equal (test-number2 123445) t))
+    (should (equal (test-number2 123455) t)))
+
+  (ert-deftest repeated-digit-only-group-of-two ()
+    (should (equal (repeats-a-number2-p 11) t))
+    (should (equal (repeats-a-number2-p 111) nil))
+    (should (equal (repeats-a-number2-p 1221) t))
+    (should (equal (repeats-a-number2-p 11122) t)))
+
+  (defun 6-digits-p (num)
+    (= (length (number-to-string num)) 6))
+
+  (defun repeats-a-number2-p (num)
+    (setq res '())
+    (let ((digits (vconcat (split-string (number-to-string num) "" t))))
+      (dotimes (i (length digits))
+        (when (and (> i 0)
+                   (= (string-to-number (elt digits i))
+                      (string-to-number (elt digits (1- i)))))
+          (setq res (cons (elt digits i) res))
+          (when (and (> i 1)
+                     (= (string-to-number (elt digits i))
+                        (string-to-number (elt digits (- i 2)))))
+              (setq res (delete (elt digits i) res))))))
+    (if (> (length res) 0) t nil))
+
+  (defun digits-increase-p (num)
+    (setq increase-p t)
+    (let ((digits (vconcat (split-string (number-to-string num) "" t))))
+      (dotimes (i (length digits))
+        (if (and (> i 0) (equal increase-p t))
+            (if (< (string-to-number (elt digits i)) (string-to-number (elt digits (1- i))))
+                (setq increase-p nil)))))
+    increase-p)
+
+  (defun test-number2 (num)
+    (when (and
+           (6-digits-p num)
+           (digits-increase-p num)
+           (repeats-a-number2-p num))
+      t))
+
+  (defun count-valid-passwords2 (start end)
+    (let ((valid-count 0)
+          (valid-pws))
+      (dolist (num (number-sequence start end))
+        (when (test-number2 num)
+          (print num)
+          (setq valid-count (1+ valid-count))
+          (setq valid-pws (cons num valid-pws))))
+      valid-count))
+
+  (print (count-valid-passwords2 284639 748759))
+#+END_SRC
+
+#+RESULTS:
+: 591
